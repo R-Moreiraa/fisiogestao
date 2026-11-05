@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vscode/
+.idea/
+backend/vendor/
+backend/storage/*.json
+.env
+*.tsbuildinfo
+backend/.env
+

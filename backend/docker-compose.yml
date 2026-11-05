@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      - APP_NAME=FisioGestão SaaS
+      - APP_ENV=production
+      - JWT_SECRET=fisio-jwt-super-secret-key-change-in-production-2025
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
+      - FRONTEND_URL=*
+    volumes:
+      - ./storage:/var/www/html/storage
