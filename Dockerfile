@@ -7,14 +7,11 @@ RUN install-php-extensions mbstring curl zip
 # Enable Apache modules
 RUN a2enmod rewrite headers
 
-# Point DocumentRoot to /var/www/html/public (keep standard /var/www path for permissions)
+# Point DocumentRoot to /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/default-ssl.conf 2>/dev/null || true
-
-# Allow .htaccess to work (AllowOverride All)
 RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
 
-# Copy backend files to standard Apache location
+# Copy backend files
 WORKDIR /var/www/html
 COPY . .
 
@@ -23,6 +20,10 @@ RUN mkdir -p storage \
     && chmod -R 777 storage \
     && chown -R www-data:www-data /var/www/html
 
+# Copy and prepare entrypoint (adjusts Apache port to match Railway's $PORT)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["/entrypoint.sh"]
