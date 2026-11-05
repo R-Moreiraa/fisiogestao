@@ -1,13 +1,7 @@
+# Exclude frontend files if build context is repo root
 node_modules/
 dist/
 dist-ssr/
-.git/
-.vscode/
-.idea/
-*.local
-backend/vendor/
-backend/storage/*.json
-backend/.env
 src/
 index.html
 package.json
@@ -20,3 +14,14 @@ vite.config.ts
 .env.production.example
 README.md
 
+# Git / IDE
+.git/
+.vscode/
+.idea/
+*.local
+.vercel/
+
+# Backend secrets/runtime
+backend/.env
+backend/vendor/
+backend/storage/*.json

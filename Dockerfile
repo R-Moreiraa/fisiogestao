@@ -27,8 +27,9 @@ RUN a2ensite fisiogestao.conf
 
 WORKDIR /app
 
-# Copy ALL backend files in one shot (avoids cache key issues)
-COPY backend/ /app/
+# Railway sends backend/ as build context (Root Directory = backend/)
+# So we copy . (which IS the backend folder) directly into /app
+COPY . /app/
 
 # Create writable storage directory and fix permissions
 RUN mkdir -p /app/storage \
