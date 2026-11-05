@@ -1,15 +1,9 @@
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions
-RUN apt-get update && apt-get install -y \
-    libcurl4-openssl-dev \
-    libonig-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    && docker-php-ext-install curl mbstring \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Use the reliable PHP extension installer (avoids apt-get issues)
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions mbstring curl zip
 
 # Enable Apache mod_rewrite and headers
 RUN a2enmod rewrite headers
@@ -31,24 +25,15 @@ RUN printf '<VirtualHost *:80>\n\
 
 RUN a2ensite fisiogestao.conf
 
-# Set working directory
 WORKDIR /app
 
-# Copy backend files into /app
-COPY backend/app ./app
-COPY backend/config ./config
-COPY backend/public ./public
-COPY backend/routes ./routes
-COPY backend/composer.json ./composer.json
+# Copy ALL backend files in one shot (avoids cache key issues)
+COPY backend/ /app/
 
-# Create storage directory
-RUN mkdir -p /app/storage && chmod -R 777 /app/storage
-
-# Fix permissions
-RUN chown -R www-data:www-data /app
-
-# Update Apache to use /app as base
-RUN sed -i 's|/var/www/html|/app|g' /etc/apache2/apache2.conf
+# Create writable storage directory and fix permissions
+RUN mkdir -p /app/storage \
+    && chmod -R 777 /app/storage \
+    && chown -R www-data:www-data /app
 
 EXPOSE 80
 
