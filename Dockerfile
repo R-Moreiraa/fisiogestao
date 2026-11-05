@@ -1,33 +1,33 @@
 FROM php:8.2-apache
 
-# Reliable PHP extension installer
-ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions mbstring curl zip
+# Install PHP extensions + fix MPM in a single layer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libcurl4-openssl-dev \
+        libonig-dev \
+        libzip-dev \
+        zip \
+        unzip \
+    && docker-php-ext-install mbstring curl zip \
+    && a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork \
+    && a2enmod rewrite headers \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Fix MPM conflict: disable event, enable prefork (required for mod_php)
-RUN a2dismod mpm_event || true \
-    && a2dismod mpm_worker || true \
-    && a2enmod mpm_prefork
-
-# Enable Apache modules
-RUN a2enmod rewrite headers php8.2
-
-# Point DocumentRoot to /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-
-# Allow .htaccess override
-RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
+# Point DocumentRoot to public/
+RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
+    && sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
 
 # Copy backend files
 WORKDIR /var/www/html
 COPY . .
 
-# Create writable storage and fix permissions
+# Storage + permissions
 RUN mkdir -p storage \
     && chmod -R 777 storage \
     && chown -R www-data:www-data /var/www/html
 
-# Entrypoint adjusts Apache port to match Railway's $PORT env var
+# Adjust Apache port to Railway's $PORT
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
