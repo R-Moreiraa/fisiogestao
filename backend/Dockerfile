@@ -34,3 +34,4 @@ RUN mkdir -p storage && chmod -R 777 storage
 EXPOSE 80
 
 CMD ["apache2-foreground"]
+

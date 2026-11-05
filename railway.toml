@@ -7,3 +7,4 @@ startCommand = "apache2-foreground"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
+

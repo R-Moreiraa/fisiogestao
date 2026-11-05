@@ -16,3 +16,4 @@ services:
       - FRONTEND_URL=*
     volumes:
       - ./storage:/var/www/html/storage
+

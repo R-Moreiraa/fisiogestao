@@ -10,3 +10,5 @@ backend/storage/*.json
 *.tsbuildinfo
 backend/.env
 
+
+.vercel
